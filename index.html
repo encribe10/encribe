@@ -5,6 +5,11 @@
         body {
             font-family: monospace;
             white-space: pre;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .hidden {
             display: none;
@@ -13,11 +18,11 @@
 </head>
 <body>
 <pre class="hidden">
-  _____
- /     \
-| () () |
- \  ^  /
-  |||||
+     _______
+    /       \
+   |  0   0  |
+   |    ^    |
+   \_________/
 </pre>
 <script>
     document.querySelector('pre').classList.remove('hidden');
