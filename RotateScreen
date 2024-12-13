@@ -1,0 +1,74 @@
+# Name der Anwendung, die überprüft werden soll
+$appName = "notepad.exe"
+
+# Funktion, um zu überprüfen, ob die Anwendung läuft
+function IsAppRunning {
+    param (
+        [string]$appName
+    )
+    $process = Get-Process -Name $appName -ErrorAction SilentlyContinue
+    return $process -ne $null
+}
+
+# Bildschirm um 180 Grad drehen
+function RotateScreen {
+    Add-Type -TypeDefinition @"
+    using System;
+    using System.Runtime.InteropServices;
+
+    public class ScreenRotation {
+        [DllImport("user32.dll")]
+        public static extern int ChangeDisplaySettingsEx(string lpszDeviceName, ref DEVMODE lpDevMode, IntPtr hwnd, int dwflags, IntPtr lParam);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct DEVMODE {
+            public const int DM_DISPLAYORIENTATION = 0x80;
+            public const int DMDO_180 = 2;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string dmDeviceName;
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public int dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string dmFormName;
+            public short dmLogPixels;
+            public short dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+            public int dmDisplayFlags;
+            public int dmNup;
+            public int dmDisplayFrequency;
+        }
+
+        public static void RotateScreen() {
+            DEVMODE dm = new DEVMODE();
+            dm.dmSize = (short)Marshal.SizeOf(dm);
+            dm.dmFields = DEVMODE.DM_DISPLAYORIENTATION;
+            dm.dmDisplayOrientation = DEVMODE.DMDO_180;
+
+            ChangeDisplaySettingsEx(null, ref dm, IntPtr.Zero, 0, IntPtr.Zero);
+        }
+    }
+"@
+
+    [ScreenRotation]::RotateScreen()
+}
+
+# Überprüfen, ob die Anwendung läuft und dann den Bildschirm drehen
+while (-not (IsAppRunning -appName $appName)) {
+    Start-Sleep -Seconds 5
+}
+
+RotateScreen
